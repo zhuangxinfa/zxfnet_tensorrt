@@ -11,7 +11,6 @@ class Logger :public ILogger{
         std::cout<<msg<<std::endl;
     }
 }gLogger;
-std::__cxx11::string uffPath = "/home/nvidia/Desktop/test2x.uff";
 void ZxfNet::build(){
     IBuilder* builder = createInferBuilder(gLogger);
     INetworkDefinition* network = builder->createNetwork();
@@ -23,7 +22,7 @@ void ZxfNet::build(){
     // parser->parse("zxf.uff", *network, nvinfer1::DataType::kFLOAT);
 
     parser->registerInput("x_placeholder", DimsCHW(1, 10, 10), UffInputOrder::kNHWC);
-    parser->registerOutput("add_op");
+    parser->registerOutput("sum_fin_op");
     parser->parse("/home/nvidia/Desktop/test2x.uff", *network, nvinfer1::DataType::kFLOAT);
     //[E] [TRT] UffParser: Unsupported number of graph 0
 
@@ -42,15 +41,16 @@ void ZxfNet::build(){
 //    std::cout<<engine->getBindingName(0)<<std::endl;
 //    std::cout<<engine->getBindingName(1)<<std::endl;
     int inputIndex = engine->getBindingIndex("x_placeholder");
-    int outputIndex = engine->getBindingIndex("add_op");
+    int outputIndex = engine->getBindingIndex("sum_fin_op");
 
     float * input_tensor;
   cudaHostAlloc((void**)&input_tensor, 10*10 * sizeof(float), cudaHostAllocMapped);
-
+//input data init
   for (int i = 0; i < 10*10; i++)
   {
-    input_tensor[i] = (float)3.5;
+    input_tensor[i] = (float)1.5;
   }
+  //out  = input +1+2+3=1.5+1+2+3=10.5
      // allocate memory on host / device for input / output
     float *output;
     float *inputDevice;
@@ -67,6 +67,7 @@ void ZxfNet::build(){
     // void* outputbuffer = nullptr;
     buffers[inputIndex] = inputDevice;
     buffers[outputIndex] = outputDevice;
+    std::cout<<outputIndex<<std::endl;
     int batchsize = 1;
     cudaStream_t stream = nullptr;
     context->execute(1, (void**)buffers);
