@@ -1,5 +1,5 @@
 QT -= gui
-
+QMAKE_CXXFLAGS+= -std=c++0x
 CONFIG += c++11 console
 CONFIG -= app_bundle
 
@@ -15,7 +15,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += main.cpp \
-    zxfnet.cpp
+    zxfnet.cpp \
+    my_matmul_plugin.cpp
 INCLUDEPATH += /usr/local/cuda/include/
 INCLUDEPATH += /usr/include/aarch64-linux-gnu/
 
@@ -37,4 +38,5 @@ LIBS +=-lcudart
 LIBS +=-lculibos
 
 HEADERS += \
-    zxfnet.h
+    zxfnet.h \
+    my_matmul_plugin.h
