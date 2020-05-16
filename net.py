@@ -12,9 +12,10 @@ import numpy as np
 # (x+2)*3+4
 x = tf.placeholder(tf.float32,shape = [10,10,1],name = "x_placeholder")
 two = tf.constant(2.0,dtype = tf.float32,shape=[10,10,1],name = "two_op")
-three = tf.constant(3.0,dtype = tf.float32,shape=[1,1,1],name = "two_op")
-four = tf.constant(4.0,dtype = tf.float32,shape=[10,10,1],name = "two_op")
+three = tf.constant(3.0,dtype = tf.float32,shape=[10,10,1],name = "three_op")
+four = tf.constant(4.0,dtype = tf.float32,shape=[10,10,1],name = "four_op")
 y=tf.add(x,two,name = "add_op")
+
 dot = tf.add(y,three,name = "dot_op")
 sum_fin = tf.add(dot,four,name="sum_fin_op") 
 sess = tf.Session()

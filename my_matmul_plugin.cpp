@@ -312,6 +312,8 @@ private:
 
     MyMatMulPlugin::MyMatMulPlugin(const PluginFieldCollection& fc)
     {
+        std::cout<<"MyMatMulPlugin constructfc...."<<std::endl;
+
         // To do: TRT-TRT-8010 Populate Parameters from fc object w/ hard code
         // mPoolingParams.pType = PoolingType::kMAX;//最大池化
         // mPoolingParams.mU = 2;
@@ -321,11 +323,15 @@ private:
         // mPoolingParams.pH = 0;
         // mPoolingParams.pW = 0;
         // mMode = CUDNN_POOLING_MAX;
+        mInputDims = DimsCHW(1, 10, 10);
+        mOutputDims= DimsCHW(1, 10, 10);
+
         (void) fc;
     }
 
     MyMatMulPlugin::MyMatMulPlugin(const void* data, size_t length)
     {
+        std::cout<<"MyMatMulPlugin construct...."<<std::endl;
         // const char* d = static_cast<const char*>(data);
         // const char* const a = d;
         // mPoolingParams = read<PoolParameters>(d);
@@ -370,7 +376,8 @@ private:
 //        int width = (inputs[0].d[2] + mPoolingParams.pW * 2 - mPoolingParams.mS) / mPoolingParams.mV + 1;
 //        DimsHW outDims(height, width);
 //        return Dims3(inputs[0].d[0], outDims.h(), outDims.w());
-        return Dims3(10, 10,1);
+        return DimsCHW(1, 10, 10);
+//        return Dims3(10, 10,1);
     }
     //Initialize the layer for execution. This is called when the engine is created.
     int MyMatMulPlugin::initialize()
@@ -413,14 +420,15 @@ private:
         std::map<DataType, cudnnDataType_t> typeMap = {{DataType::kFLOAT, CUDNN_DATA_FLOAT},
             {DataType::kHALF, CUDNN_DATA_HALF}, {DataType::kINT8, CUDNN_DATA_FLOAT}};
         assert(mDataType != DataType::kINT32);
-        //将数据mSrcDescriptor转换成一个nchw的4D的格式
-//        CHECK(cudnnSetTensor4dDescriptor(mSrcDescriptor, CUDNN_TENSOR_NCHW, typeMap[mDataType], N, mPoolingParams.mC,
-//            mPoolingParams.mH, mPoolingParams.mW));
-        //将数据mDstDescriptor转换成一个nchw的4D的格式
-//        CHECK(cudnnSetTensor4dDescriptor(mDstDescriptor, CUDNN_TENSOR_NCHW, typeMap[mDataType], N, mPoolingParams.mC,
-//            mPoolingParams.mP, mPoolingParams.mQ));
-        //初始化input和output
-        void* input{nullptr};
+//        将数据mSrcDescriptor转换成一个nchw的4D的格式
+        CHECK(cudnnSetTensor4dDescriptor(mSrcDescriptor, CUDNN_TENSOR_NCHW, typeMap[mDataType], N, 1,10, 10));
+//        将数据mDstDescriptor转换成一个nchw的4D的格式
+
+
+        CHECK(cudnnSetTensor4dDescriptor(mDstDescriptor, CUDNN_TENSOR_NCHW, typeMap[mDataType], N, 1,10, 10));
+        //初始input和output
+        void* input1{nullptr};
+        void* input2{nullptr};
         void* output{nullptr};
 
         // if (mDataType == DataType::kINT8)
@@ -431,11 +439,18 @@ private:
         // }
         // else
         // {
-            input = const_cast<void*>(inputs[0]);
+            input1 = const_cast<void*>(inputs[0]);
+            input2 = const_cast<void*>(inputs[1]);
             output = const_cast<void*>(outputs[0]);
         // }
+//            float* temp = (float*)(input);
+//            for(int i =0;i<100;i++){
+//                std::cout<<*temp<<std::endl;
+//                temp++;
+//            }
         //执行池化操作 
-        CHECK(cudnnAddTensor(mCudnn, &kONE, mSrcDescriptor, input, &kZERO, mDstDescriptor, output));
+        CHECK(cudnnAddTensor(mCudnn, &kONE, mSrcDescriptor, input1, &kZERO, mDstDescriptor, output));//output=1*input1+1*output
+        CHECK(cudnnAddTensor(mCudnn, &kONE, mSrcDescriptor, input2, &kZERO, mDstDescriptor, output));//output=1*input2+1*output
         // if (mDataType == DataType::kINT8)
         // {
         //     copyDeviceToInt8Output(output, outputs[0]);

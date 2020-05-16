@@ -25,6 +25,7 @@ void ZxfNet::build(){
     parser->registerInput("x_placeholder", DimsCHW(1, 10, 10), UffInputOrder::kNHWC);
     parser->registerOutput("sum_fin_op");
     parser->parse("/home/nvidia/zxfnet_tensorrt/test2x.uff", *network, nvinfer1::DataType::kFLOAT);
+//    parser->parse("/home/nvidia/zxfnet_tensorrt/test2_nox.uff", *network, nvinfer1::DataType::kFLOAT);
     //[E] [TRT] UffParser: Unsupported number of graph 0
 
     builder->setMaxBatchSize(1);
